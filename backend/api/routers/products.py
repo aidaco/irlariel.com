@@ -5,13 +5,13 @@ from fastapi import APIRouter
 import auth
 from auth import AuthLevel
 
-from . import BASE, router
+router = APIRouter()
 
 
 
 # GET
 
-@router.get(API_BASE+)
+@router.get('/')
 async def get_products():
     # TODO
     # ? get all products
@@ -27,12 +27,12 @@ async def get_products():
     # ?     sort order
     pass
 
-@router.get(API_BASE + '/{id_}')
+@router.get('/{id_}')
 async def get_product(id_: int):
     # TODO
     pass
 
-@router.get(API_BASE + '/{ids}')
+@router.get('/{ids}')
 async def get_products_by_id(ids: list):
     # TODO
     # ? get a given list of products by ids
@@ -40,13 +40,13 @@ async def get_products_by_id(ids: list):
 
 # POST
 
-@router.post(API_BASE)
+@router.post('/')
 @auth.require(AuthLevel.Moderator)
 async def new_product():
     # TODO
     pass
 
-@router.post(API_BASE + '/{id_}')
+@router.post('/{id_}')
 @auth.require(AuthLevel.Moderator)
 async def update_product(id_: int):
     # TODO
@@ -54,7 +54,7 @@ async def update_product(id_: int):
 
 # DELETE
 
-@router.delete(API_BASE + '/{id_}')
+@router.delete('/{id_}')
 @auth.require(AuthLevel.Moderator)
 async def delete_product(id_):
     # TODO

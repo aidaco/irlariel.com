@@ -5,16 +5,11 @@ from fastapi import APIRouter
 import auth
 from auth import AuthLevel
 
-from . import BASE, router
-
-
-RESOURCE = 'users'
-
-BASEURL = f"{BASE}/{RESOURCE}"
+router = APIRouter()
 
 # GET
 
-@router.get(BASEURL)
+@router.get('/')
 @auth.require(AuthLevel.Admin)
 async def get_users():
     # TODO
@@ -31,22 +26,19 @@ async def get_users():
     # ?     sort order
     pass
 
-login = auth.login(BASEURL + '/login')
-logout = auth.login(BASEURL + '/logout')
-
-@router.get(BASEURL + '/me')
+@router.get('/me')
 @auth.require(AuthLevel.Basic)
 async def get_user_me():
     # TODO
     pass
 
-@router.get(BASEURL + '/{id_}')
+@router.get('/{id_}')
 @auth.require(AuthLevel.Moderator)
 async def get_user(id_: str):
     # TODO
     pass
 
-@router.get(BASEURL + '/{ids}')
+@router.get('/{ids}')
 @auth.require(AuthLevel.Admin)
 async def get_users(ids: list):
     # TODO
@@ -56,18 +48,18 @@ async def get_users(ids: list):
 
 # POST
 
-@router.post(BASEURL)
+@router.post('/')
 async def new_user():
     # TODO
     pass
 
-@router.delete(BASEURL + '/me')
+@router.delete('/me')
 @auth.require
 async def delete_self():
     # TODO
     pass
 
-@router.post(BASEURL + '/{id_}')
+@router.post('/{id_}')
 @auth.require(AuthLevel.Admin)
 async def update_user(id_: str):
     # TODO
@@ -75,7 +67,7 @@ async def update_user(id_: str):
 
 # DELETE
 
-@router.delete(BASEURL + '/{id_}')
+@router.delete('/{id_}')
 @auth.require(AuthLevel.Admin)
 async def delete_user(id_: str):
     # TODO
