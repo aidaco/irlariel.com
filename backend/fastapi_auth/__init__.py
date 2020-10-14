@@ -2,76 +2,44 @@
 
 from enum import Enum
 from typing import Callable
-from auth.models import UserBase, SessionKey, AccessToken, AuthLevel
+from auth.models import UserBase, AccessToken, AuthLevel
+from pydantic import BaseModel
 from fastapi import APIRouter, Request
 
 
-def require_auth(level: AuthLevel):
-    # TODO
-    # ? decorator to require an AuthSession with specified AuthLevel
-    pass
-
-async def require_login(f: Callable):
-    # TODO
-    # ? decorator to require a valid AuthSession to access
-    pass
-
-class Authentication:
-    async def __call__(self, request: Request, call_next: Callable):
-        # TODO docs
-        auth = AuthSession.from_request(request)
-        request.state.auth = auth
-        response = await call_next(request)
-        return response
-
-def _userloader(id_: str) -> UserBase:
-    return None
-
-def set_userloader(f: Callable):
-    # TODO
-    # ? User should call to set userloader
-    _userloader = f
-
-class AuthSession(pydantic.Model):
+class AuthSession(BaseModel):
     access_token: Optional[AccessToken] = None
     user: Optional[UserBase] = None
-    req_signature: Optional[RequestSignature] = None
     is_authenticated: bool = False
     auth_level = AuthLevel.Basic
-    
-    @staticmethod
-    def from_request(request: Request):
-        # TODO
-        
-        secret_key = request.state.env['SECRET_KEY']
-        at_header = request.state.env['ACCESS_HEADER']
-        rst_header = request.state.env['REQUEST_SIGNATURE_HEADER']
 
-        atoken = request.headers.get(at_header, None)
-        rstoken = request.headers.get(rs_header, None)
+    def __init__(self, request: Request, authorization=Header(None)):
+        secret_key = request.state.env["SECRET_KEY"]
+        db = request.state.db
 
-        if not at:
-            return AuthSession()
-
-        access = AccessToken.from_token(key, atoken)
-
-        if not access.is_valid:
-            return AuthSession(access_token=access)
-        
-        try:
-            user = _userloader(access.payload['user_id'])
-        except:
+        access_token = AccessToken(token=authorization.split(" ")[1])
+        data = access_token.verify(secret_key)
+        if not (user_id := data.get("user_id")):
             return AuthSession(access_token=access)
 
-        rsig = RequestSignature.from_token(user.session_key, rstoken)
-
-        if not sig.is_valid:
-            return AuthSession(access_token=access, user=user)
-        
+        user = db.get_user(user_id)
         return AuthSession(
-            access_token=access, 
-            user=user, 
-            req_signature=rsig, 
+            access_token=access_token,
+            user=user,
             is_authenticated=True,
-            auth_level=user.auth_level
+            auth_level=user.auth_level,
         )
+
+
+class Auth(AuthSession):
+    @staticmethod
+    def required(level: AuthLevel = AuthLevel.Basic):
+        # TODO
+        # ? wrap super __init__ to get AuthSession
+        # ? and enforce given AuthLevel
+
+        def wrapper(*args, **kwargs):
+            authsession = self.__init__(*args, **kwargs)
+            # TODO
+
+        return wrapper
